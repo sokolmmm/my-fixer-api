@@ -4,8 +4,28 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "tsnd --respawn --no-notify --clear --transpile-only src/app.ts",
+    "build": "tsc",
+    "lint:init": "eslint --init"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "koa": "^2.13.4",
+    "koa-router": "^11.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.4",
+    "@types/koa-router": "^7.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.19.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
+  }
 }
