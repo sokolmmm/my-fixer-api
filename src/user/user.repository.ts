@@ -1,4 +1,7 @@
-interface IMapUser {
+import { v4 as uuidv4 } from 'uuid';
+
+export interface IMapUser {
+  id: string;
   firstName: string;
   lastName: string;
   userName: string;
@@ -6,6 +9,8 @@ interface IMapUser {
 }
 
 export default class User {
+  public id: string;
+
   public firstName: string;
 
   public lastName: string;
@@ -20,6 +25,7 @@ export default class User {
     userName: string,
     email: string,
   ) {
+    this.id = uuidv4();
     this.firstName = firstName;
     this.lastName = lastName;
     this.userName = userName;
@@ -28,6 +34,7 @@ export default class User {
 
   public mapUser(): IMapUser {
     return {
+      id: this.id,
       firstName: this.firstName,
       lastName: this.lastName,
       userName: this.userName,
