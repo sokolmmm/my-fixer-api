@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import { ICreateUserPayload } from '../types/interface';
 
 export interface IMapUser {
   id: string;
@@ -19,17 +21,12 @@ export default class User {
 
   public email: string;
 
-  constructor(
-    firstName: string,
-    lastName: string,
-    userName: string,
-    email: string,
-  ) {
+  constructor(payload: ICreateUserPayload) {
     this.id = uuidv4();
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.userName = userName;
-    this.email = email;
+    this.firstName = payload.firstName;
+    this.lastName = payload.lastName;
+    this.userName = payload.userName;
+    this.email = payload.email;
   }
 
   public mapUser(): IMapUser {
@@ -44,5 +41,19 @@ export default class User {
 
   public entityToString(): string {
     return JSON.stringify(this.mapUser());
+  }
+
+  public createUserInDB() {
+    const data = fs.readFileSync('db.json').toString();
+
+    const usersList: IMapUser[] = JSON.parse(data);
+
+    const userData = this.mapUser();
+
+    usersList.push(userData);
+
+    fs.writeFileSync('db.json', JSON.stringify(usersList));
+
+    return this.mapUser();
   }
 }

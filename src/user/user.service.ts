@@ -1,6 +1,7 @@
 import fs from 'fs';
-import { IMapUser } from './user.repository';
+import User, { IMapUser } from './user.repository';
 import { NotFoundError } from '../utils/errors';
+import { ICreateUserPayload } from '../types/interface';
 
 export default class UserService {
   static async usersList() {
@@ -16,6 +17,11 @@ export default class UserService {
     const user = users.find((el) => el.id === uuid);
 
     if (!user) throw new NotFoundError(`User with id: ${uuid} doesn't exist`);
+    return user;
+  }
+
+  static async createUser(payload: ICreateUserPayload) {
+    const user = new User(payload).createUserInDB();
     return user;
   }
 }

@@ -1,16 +1,1 @@
-[
-  {
-    "id": "6f1cfa83-c1c5-4e86-bb91-4b5f9d060725",
-    "firstName": "Den",
-    "lastName": "Brown",
-    "userName": "den_brown",
-    "email": "den_brown@gmail.com"
-  },
-  {
-    "id": "6f1cfa83-c1c5-4e86-bb91-4b5f9d060728",
-    "firstName": "Ben",
-    "lastName": "Sars",
-    "userName": "ben_sars",
-    "email": "ben_sars@gmail.com"
-  }
-]
+[{"id":"6f1cfa83-c1c5-4e86-bb91-4b5f9d060725","firstName":"Den","lastName":"Brown","userName":"den_brown","email":"den_brown@gmail.com"},{"id":"6f1cfa83-c1c5-4e86-bb91-4b5f9d060728","firstName":"Ben","lastName":"Sars","userName":"ben_sars","email":"ben_sars@gmail.com"},{"id":"c32764e8-6596-47a1-94d6-7b466072ba09","firstName":"Ken","lastName":"Spown","userName":"ken_spown","email":"ken_spown@gmail.com"},{"id":"2a9a112f-19b4-4e32-9c6c-8107c52caee1","firstName":"Ken","lastName":"Spown","userName":"ken_spown","email":"ken_spown@gmail.com"}]
