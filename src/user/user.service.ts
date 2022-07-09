@@ -53,4 +53,22 @@ export default class UserService {
     user.patchUserInDB();
     return user;
   }
+
+  static async deleteById(uuid: string) {
+    const usersList = fs.readFileSync('db.json').toString();
+
+    const users: IMapUser[] = JSON.parse(usersList);
+
+    const user = users.find((el) => el.id === uuid);
+
+    if (!user) throw new NotFoundError(`User with id: ${uuid} doesn't exist`);
+
+    const userIndex = users.findIndex((el) => el.id === uuid);
+
+    users.splice(userIndex, 1);
+
+    fs.writeFileSync('db.json', JSON.stringify(users));
+
+    return user;
+  }
 }

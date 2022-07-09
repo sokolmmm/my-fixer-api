@@ -78,4 +78,12 @@ export default class UserController {
     console.log(user);
     ctx.body = user;
   }
+
+  static async deleteUserById(ctx: Context) {
+    const { userId } = ctx.params;
+
+    const user = await UserService.deleteById(userId);
+
+    ctx.body = user;
+  }
 }
