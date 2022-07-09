@@ -11,12 +11,20 @@ class User {
     lastName;
     userName;
     email;
-    constructor(payload) {
-        this.id = (0, uuid_1.v4)();
+    country;
+    phoneNumber;
+    title;
+    company;
+    set setUserData(payload) {
+        this.id = payload.id || (0, uuid_1.v4)();
         this.firstName = payload.firstName;
         this.lastName = payload.lastName;
         this.userName = payload.userName;
         this.email = payload.email;
+        this.country = payload.country || '';
+        this.phoneNumber = payload.phoneNumber || '';
+        this.title = payload.title || '';
+        this.company = payload.company || '';
     }
     mapUser() {
         return {
@@ -25,6 +33,10 @@ class User {
             lastName: this.lastName,
             userName: this.userName,
             email: this.email,
+            country: this.country,
+            phoneNumber: this.phoneNumber,
+            title: this.title,
+            company: this.company,
         };
     }
     entityToString() {
