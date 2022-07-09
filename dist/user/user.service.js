@@ -20,7 +20,9 @@ class UserService {
         return user;
     }
     static async createUser(payload) {
-        const user = new user_repository_1.default(payload).createUserInDB();
+        const user = new user_repository_1.default();
+        user.setUserData = payload;
+        user.createUserInDB();
         return user;
     }
 }

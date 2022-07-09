@@ -16,18 +16,27 @@ class UserController {
         ctx.body = user;
     }
     static async createUser(ctx) {
-        const { firstName, lastName, userName, email, } = ctx.request.body;
+        const { firstName, lastName, userName, email, country, phoneNumber, title, company, } = ctx.request.body;
         user_validator_1.default.validateCreateUserPayload({
             firstName,
             lastName,
             userName,
             email,
+            country,
+            phoneNumber,
+            title,
+            company,
+            id: ''
         });
         const user = await user_service_1.default.createUser({
             firstName,
             lastName,
             userName,
             email,
+            country,
+            phoneNumber,
+            title,
+            company,
         });
         console.log(user);
         ctx.body = user;
