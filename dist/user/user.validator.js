@@ -13,10 +13,32 @@ class UserValidator {
         email: joi_1.default.string().email({
             minDomainSegments: 2,
             tlds: { allow: ['com', 'net'] },
+        }).required(),
+        country: joi_1.default.string().min(3).max(15),
+        phoneNumber: joi_1.default.string().min(3).max(15),
+        title: joi_1.default.string().min(3).max(15),
+        company: joi_1.default.string().min(3).max(15),
+    });
+    patchUserSchema = joi_1.default.object({
+        firstName: joi_1.default.string().min(3).max(15),
+        lastName: joi_1.default.string().min(3).max(15),
+        userName: joi_1.default.string().min(3).max(15),
+        email: joi_1.default.string().email({
+            minDomainSegments: 2,
+            tlds: { allow: ['com', 'net'] },
         }),
+        country: joi_1.default.string().min(3).max(15),
+        phoneNumber: joi_1.default.string().min(3).max(15),
+        title: joi_1.default.string().min(2).max(15),
+        company: joi_1.default.string().min(3).max(15),
     });
     validateCreateUserPayload(payload) {
         const result = this.createUserSchema.validate(payload);
+        if (result.error)
+            throw new errors_1.ValidationError(result.error.message);
+    }
+    validatePatchUserPayload(payload) {
+        const result = this.patchUserSchema.validate(payload);
         if (result.error)
             throw new errors_1.ValidationError(result.error.message);
     }

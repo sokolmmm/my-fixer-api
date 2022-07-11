@@ -61,7 +61,6 @@ export default class UserController {
     } = ctx.request.body;
 
     const payload = {
-      id: userId,
       firstName,
       lastName,
       userName,
@@ -74,7 +73,7 @@ export default class UserController {
 
     userValidator.validatePatchUserPayload(payload);
 
-    const user = await UserService.patchUser(payload);
+    const user = await UserService.patchUser({ id: userId, ...payload });
     console.log(user);
     ctx.body = user;
   }

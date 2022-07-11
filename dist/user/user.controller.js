@@ -17,7 +17,7 @@ class UserController {
     }
     static async createUser(ctx) {
         const { firstName, lastName, userName, email, country, phoneNumber, title, company, } = ctx.request.body;
-        user_validator_1.default.validateCreateUserPayload({
+        const payload = {
             firstName,
             lastName,
             userName,
@@ -26,19 +26,33 @@ class UserController {
             phoneNumber,
             title,
             company,
-            id: ''
-        });
-        const user = await user_service_1.default.createUser({
-            firstName,
-            lastName,
-            userName,
-            email,
-            country,
-            phoneNumber,
-            title,
-            company,
-        });
+        };
+        user_validator_1.default.validateCreateUserPayload(payload);
+        const user = await user_service_1.default.createUser(payload);
         console.log(user);
+        ctx.body = user;
+    }
+    static async patchUserById(ctx) {
+        const { userId } = ctx.params;
+        const { firstName, lastName, userName, email, country, phoneNumber, title, company, } = ctx.request.body;
+        const payload = {
+            firstName,
+            lastName,
+            userName,
+            email,
+            country,
+            phoneNumber,
+            title,
+            company,
+        };
+        user_validator_1.default.validatePatchUserPayload(payload);
+        const user = await user_service_1.default.patchUser({ id: userId, ...payload });
+        console.log(user);
+        ctx.body = user;
+    }
+    static async deleteUserById(ctx) {
+        const { userId } = ctx.params;
+        const user = await user_service_1.default.deleteById(userId);
         ctx.body = user;
     }
 }

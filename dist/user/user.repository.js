@@ -50,6 +50,15 @@ class User {
         fs_1.default.writeFileSync('db.json', JSON.stringify(usersList));
         return this.mapUser();
     }
+    patchUserInDB() {
+        const data = fs_1.default.readFileSync('db.json').toString();
+        const usersList = JSON.parse(data);
+        const userIndex = usersList.findIndex((el) => el.id === this.id);
+        const userData = this.mapUser();
+        usersList[userIndex] = userData;
+        fs_1.default.writeFileSync('db.json', JSON.stringify(usersList));
+        return this.mapUser();
+    }
 }
 exports.default = User;
 //# sourceMappingURL=user.repository.js.map

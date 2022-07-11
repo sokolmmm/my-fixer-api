@@ -4,32 +4,31 @@ import { ICreateUserPayload } from '../types/interface';
 
 class UserValidator {
   private createUserSchema = Joi.object({
-    firstName: Joi.string().min(3).max(15).required(),
-    lastName: Joi.string().min(3).max(15).required(),
+    firstName: Joi.string().min(3).max(10).required(),
+    lastName: Joi.string().min(3).max(10).required(),
     userName: Joi.string().min(3).max(10).required(),
     email: Joi.string().email({
       minDomainSegments: 2,
       tlds: { allow: ['com', 'net'] },
     }).required(),
-    country: Joi.string().min(3).max(15),
-    phoneNumber: Joi.string().min(3).max(15),
-    title: Joi.string().min(3).max(15),
-    company: Joi.string().min(3).max(15),
+    country: Joi.string().min(3).max(10),
+    phoneNumber: Joi.string().min(3).max(10),
+    title: Joi.string().min(2).max(10),
+    company: Joi.string().min(3).max(10),
   });
 
   private patchUserSchema = Joi.object({
-    id: Joi.string(),
-    firstName: Joi.string().min(3).max(15),
-    lastName: Joi.string().min(3).max(15),
-    userName: Joi.string().min(3).max(15),
+    firstName: Joi.string().min(3).max(10),
+    lastName: Joi.string().min(3).max(10),
+    userName: Joi.string().min(3).max(10),
     email: Joi.string().email({
       minDomainSegments: 2,
       tlds: { allow: ['com', 'net'] },
     }),
-    country: Joi.string().min(3).max(15),
-    phoneNumber: Joi.string().min(3).max(15),
-    title: Joi.string().min(2).max(15),
-    company: Joi.string().min(3).max(15),
+    country: Joi.string().min(3).max(10),
+    phoneNumber: Joi.string().min(3).max(10),
+    title: Joi.string().min(2).max(10),
+    company: Joi.string().min(3).max(10),
   });
 
   public validateCreateUserPayload(payload: ICreateUserPayload) {
