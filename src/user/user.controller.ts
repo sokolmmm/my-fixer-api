@@ -1,10 +1,15 @@
 import { Context } from 'koa';
 import UserService from './user.service';
 import userValidator from './user.validator';
+import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 
 export default class UserController {
   static async usersList(ctx: Context) {
-    const users = await UserService.usersList();
+    const searchParams: ISearchUsersParams = ctx.query;
+
+    userValidator.validateSearchUsersParams(searchParams);
+
+    const users = await UserService.usersList(searchParams);
 
     ctx.body = users;
   }
@@ -18,62 +23,23 @@ export default class UserController {
   }
 
   static async createUser(ctx: Context) {
-    const {
-      firstName,
-      lastName,
-      userName,
-      email,
-      country,
-      phoneNumber,
-      title,
-      company,
-    } = ctx.request.body;
-
-    const payload = {
-      firstName,
-      lastName,
-      userName,
-      email,
-      country,
-      phoneNumber,
-      title,
-      company,
-    };
+    const payload: ICreateUserPayload = ctx.request.body;
 
     userValidator.validateCreateUserPayload(payload);
 
     const user = await UserService.createUser(payload);
-    console.log(user);
+
     ctx.body = user;
   }
 
   static async patchUserById(ctx: Context) {
     const { userId } = ctx.params;
-    const {
-      firstName,
-      lastName,
-      userName,
-      email,
-      country,
-      phoneNumber,
-      title,
-      company,
-    } = ctx.request.body;
 
-    const payload = {
-      firstName,
-      lastName,
-      userName,
-      email,
-      country,
-      phoneNumber,
-      title,
-      company,
-    };
+    const payload: ICreateUserPayload = ctx.request.body;
 
-    userValidator.validatePatchUserPayload(payload);
+    // userValidator.validatePatchUserPayload(payload);
 
-    const user = await UserService.patchUser({ id: userId, ...payload });
+    const user = await UserService.patchUser(userId, payload);
     console.log(user);
     ctx.body = user;
   }

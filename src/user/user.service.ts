@@ -1,74 +1,56 @@
-import fs from 'fs';
-import { ICreateUserPayload } from '../types/interface';
-import User, { IMapUser } from './user.repository';
+/* eslint-disable no-unused-vars */
+import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
+import dataSource from '../database/databaseConfig';
+import User from './entities/user.repository';
 
 export default class UserService {
-  static async usersList() {
-    const users = fs.readFileSync('db.json').toString();
+  static async usersList(params: ISearchUsersParams) {
+    // const users = await dataSource.getRepository(User).find();
+    // return users;
+
+    const users = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('profile.stack', 'stack')
+      .select(['user', 'profile.rating', 'stack.title'])
+      .take(params.limit)
+      .skip(params.limit * (params.page - 1) || 0)
+      .orderBy('user.id', params.orderBy)
+      .getMany();
+
     return users;
   }
 
-  static async userById(uuid: string) {
-    const usersList = fs.readFileSync('db.json').toString();
+  static async userById(id: string) {
+    const users = await dataSource.getRepository(User).findOne({
+      where: {
+        id: +id,
+      },
+    });
 
-    const users: IMapUser[] = JSON.parse(usersList);
-
-    const user = users.find((el) => el.id === uuid);
-
-    if (!user) throw new NotFoundError(`User with id: ${uuid} doesn't exist`);
-    return user;
+    return users;
   }
 
   static async createUser(payload: ICreateUserPayload) {
-    const user = new User();
-    user.setUserData = payload;
-    user.createUserInDB();
+    const user = await dataSource.createEntityManager().save(User, {
+      ...payload,
+    });
+
     return user;
   }
 
-  static async patchUser(userData: ICreateUserPayload) {
-    const usersList = fs.readFileSync('db.json').toString();
+  static async patchUser(id: string, payload: ICreateUserPayload) {
+    await dataSource.createEntityManager().update(User, id, {
+      ...payload,
+    });
 
-    const users: IMapUser[] = JSON.parse(usersList);
-
-    const userPrevData :ICreateUserPayload = users.find((el) => el.id === userData.id);
-
-    if (!userPrevData) throw new NotFoundError(`User with id: ${userData.id} doesn't exist`);
-
-    const payload = {
-      id: userData.id,
-      firstName: userData.firstName || userPrevData.firstName,
-      lastName: userData.lastName || userPrevData.lastName,
-      userName: userData.userName || userPrevData.userName,
-      email: userData.email || userPrevData.email,
-      country: userData.country || userPrevData.country,
-      phoneNumber: userData.phoneNumber || userPrevData.phoneNumber,
-      title: userData.title || userPrevData.title,
-      company: userData.company || userPrevData.company,
-    };
-
-    const user = new User();
-    user.setUserData = payload;
-    user.patchUserInDB();
+    const user = this.userById(id);
     return user;
   }
 
-  static async deleteById(uuid: string) {
-    const usersList = fs.readFileSync('db.json').toString();
-
-    const users: IMapUser[] = JSON.parse(usersList);
-
-    const user = users.find((el) => el.id === uuid);
-
-    if (!user) throw new NotFoundError(`User with id: ${uuid} doesn't exist`);
-
-    const userIndex = users.findIndex((el) => el.id === uuid);
-
-    users.splice(userIndex, 1);
-
-    fs.writeFileSync('db.json', JSON.stringify(users));
-
-    return user;
+  static async deleteById(id: number) {
+    await dataSource.createEntityManager().delete(User, id);
   }
 }
