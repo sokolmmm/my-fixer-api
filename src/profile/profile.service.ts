@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable object-shorthand */
 import { ICreateProfilePayload } from '../types/interface';
 // import { NotFoundError } from '../utils/errors';
 import Profile from './entities/profile.repository';
@@ -53,13 +51,6 @@ export default class ProfileService {
   }
 
   static async profileById(userId: string) {
-    // const profile = await dataSource
-    //   .getRepository(Profile)
-    //   .createQueryBuilder('profile')
-    //   .where('profile.userId = :userId', { userId })
-    //   .getOne();
-    // return profile;
-
     const profile = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -68,6 +59,7 @@ export default class ProfileService {
       .select(['user.id', 'profile.rating', 'stack.title'])
       .where('user.id = :id', { id: userId })
       .getOne();
+
     return profile;
   }
 }
