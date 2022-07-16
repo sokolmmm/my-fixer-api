@@ -1,74 +1,74 @@
-import fs from 'fs';
-import { ICreateUserPayload } from '../types/interface';
-import User, { IMapUser } from './user.repository';
+import dataSource from '../database/databaseConfig';
+import User from './entities/user.repository';
+import Profile from '../profile/entities/profile.repository';
+import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
 export default class UserService {
-  static async usersList() {
-    const users = fs.readFileSync('db.json').toString();
+  static async getUserById(id: number) {
+    const user = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('profile.stack', 'stack')
+      .select(['user', 'profile.rating', 'stack.title'])
+      .where({ id: +id })
+      .getOne();
+
+    return user;
+  }
+
+  static async usersList(params: ISearchUsersParams) {
+    const users = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('profile.stack', 'stack')
+      .select(['user', 'profile.rating', 'stack.title'])
+      .take(params.limit)
+      .skip(params.limit * (params.page - 1) || 0)
+      .orderBy('user.id', params.orderBy)
+      .getMany();
+
     return users;
   }
 
-  static async userById(uuid: string) {
-    const usersList = fs.readFileSync('db.json').toString();
+  static async retrieveUserById(id: string) {
+    const user = await this.getUserById(+id);
 
-    const users: IMapUser[] = JSON.parse(usersList);
+    if (!user) throw new NotFoundError(`User with id: ${id} doesn't exist`);
 
-    const user = users.find((el) => el.id === uuid);
-
-    if (!user) throw new NotFoundError(`User with id: ${uuid} doesn't exist`);
     return user;
   }
 
   static async createUser(payload: ICreateUserPayload) {
-    const user = new User();
-    user.setUserData = payload;
-    user.createUserInDB();
-    return user;
+    const user = await dataSource.createEntityManager().save(User, {
+      ...payload,
+    });
+
+    await dataSource.createEntityManager().save(Profile, {
+      user,
+    });
+
+    const userInDB = await this.getUserById(user.id);
+    return userInDB;
   }
 
-  static async patchUser(userData: ICreateUserPayload) {
-    const usersList = fs.readFileSync('db.json').toString();
+  static async patchUser(id: string, payload: ICreateUserPayload) {
+    const user = await dataSource.createEntityManager().update(User, id, {
+      ...payload,
+    });
 
-    const users: IMapUser[] = JSON.parse(usersList);
+    if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
 
-    const userPrevData :ICreateUserPayload = users.find((el) => el.id === userData.id);
+    const userInDB = await this.getUserById(+id);
 
-    if (!userPrevData) throw new NotFoundError(`User with id: ${userData.id} doesn't exist`);
-
-    const payload = {
-      id: userData.id,
-      firstName: userData.firstName || userPrevData.firstName,
-      lastName: userData.lastName || userPrevData.lastName,
-      userName: userData.userName || userPrevData.userName,
-      email: userData.email || userPrevData.email,
-      country: userData.country || userPrevData.country,
-      phoneNumber: userData.phoneNumber || userPrevData.phoneNumber,
-      title: userData.title || userPrevData.title,
-      company: userData.company || userPrevData.company,
-    };
-
-    const user = new User();
-    user.setUserData = payload;
-    user.patchUserInDB();
-    return user;
+    return userInDB;
   }
 
-  static async deleteById(uuid: string) {
-    const usersList = fs.readFileSync('db.json').toString();
+  static async deleteById(id: string) {
+    const user = await dataSource.createEntityManager().delete(User, id);
 
-    const users: IMapUser[] = JSON.parse(usersList);
-
-    const user = users.find((el) => el.id === uuid);
-
-    if (!user) throw new NotFoundError(`User with id: ${uuid} doesn't exist`);
-
-    const userIndex = users.findIndex((el) => el.id === uuid);
-
-    users.splice(userIndex, 1);
-
-    fs.writeFileSync('db.json', JSON.stringify(users));
-
-    return user;
+    if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
   }
 }

@@ -1,11 +1,33 @@
+/* eslint-disable no-shadow */
+/* eslint-disable no-unused-vars */
+export enum EnumOrderBy {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export enum EnumPersonalTitles {
+  MR = 'mr',
+  MRS = 'mrs',
+  MS = 'ms',
+  MISS = 'miss',
+}
+
 export interface ICreateUserPayload {
-  id?: string;
   firstName: string;
   lastName: string;
-  userName: string;
   email: string;
   country: string;
   phoneNumber: string;
   title: string;
-  company: string;
+}
+
+export interface ICreateProfilePayload {
+  rating: number;
+  stack: number;
+}
+
+export interface ISearchUsersParams {
+  page?: number;
+  limit?: number;
+  orderBy?: EnumOrderBy;
 }
