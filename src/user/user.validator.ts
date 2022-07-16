@@ -1,4 +1,5 @@
 import Joi from 'joi';
+
 import { ValidationError } from '../utils/errors';
 import { ICreateUserPayload, ISearchUsersParams, EnumOrderBy } from '../types/interface';
 
@@ -18,7 +19,6 @@ class UserValidator {
   private patchUserSchema = Joi.object({
     firstName: Joi.string().min(3).max(10),
     lastName: Joi.string().min(3).max(10),
-    userName: Joi.string().min(3).max(10),
     email: Joi.string().email({
       minDomainSegments: 2,
       tlds: { allow: ['com', 'net'] },
@@ -26,7 +26,6 @@ class UserValidator {
     country: Joi.string().min(3).max(10),
     phoneNumber: Joi.string().min(3).max(10),
     title: Joi.string().min(2).max(10),
-    company: Joi.string().min(3).max(10),
   });
 
   private searchUsersSchema = Joi.object({

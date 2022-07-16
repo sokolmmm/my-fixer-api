@@ -1,8 +1,9 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable import/no-cycle */
 import {
   Entity, PrimaryGeneratedColumn, Column, OneToOne,
 } from 'typeorm';
+
+import { EnumPersonalTitles } from '../../types/interface';
 import Profile from '../../profile/entities/profile.repository';
 
 @Entity()
@@ -30,6 +31,8 @@ export default class User {
     phoneNumber: string;
 
   @Column({
+    type: 'enum',
+    enum: EnumPersonalTitles,
     nullable: true,
   })
     title: string;

@@ -5,6 +5,13 @@ export enum EnumOrderBy {
   DESC = 'DESC',
 }
 
+export enum EnumPersonalTitles {
+  MR = 'mr',
+  MRS = 'mrs',
+  MS = 'ms',
+  MISS = 'miss',
+}
+
 export interface ICreateUserPayload {
   firstName: string;
   lastName: string;
@@ -20,7 +27,7 @@ export interface ICreateProfilePayload {
 }
 
 export interface ISearchUsersParams {
-  page?: number,
-  limit?: number,
-  orderBy?: EnumOrderBy,
+  page?: number;
+  limit?: number;
+  orderBy?: EnumOrderBy;
 }

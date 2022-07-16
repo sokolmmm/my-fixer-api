@@ -1,4 +1,5 @@
 import { Context } from 'koa';
+
 import UserService from './user.service';
 import userValidator from './user.validator';
 import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
@@ -17,7 +18,7 @@ export default class UserController {
   static async retrieveUserById(ctx: Context) {
     const { userId } = ctx.params;
 
-    const user = await UserService.userById(userId);
+    const user = await UserService.retrieveUserById(userId);
 
     ctx.body = user;
   }
@@ -37,10 +38,10 @@ export default class UserController {
 
     const payload: ICreateUserPayload = ctx.request.body;
 
-    // userValidator.validatePatchUserPayload(payload);
+    userValidator.validatePatchUserPayload(payload);
 
     const user = await UserService.patchUser(userId, payload);
-    console.log(user);
+
     ctx.body = user;
   }
 
