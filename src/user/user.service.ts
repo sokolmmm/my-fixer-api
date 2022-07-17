@@ -5,7 +5,7 @@ import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
 export default class UserService {
-  static async getUserFromDB(id: number) {
+  private static async getUserFromDB(id: number) {
     const user = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')

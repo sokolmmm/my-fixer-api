@@ -31,3 +31,7 @@ export interface ISearchUsersParams {
   limit?: number;
   orderBy?: EnumOrderBy;
 }
+
+export interface ICreateStackPayload {
+  title: string;
+}
