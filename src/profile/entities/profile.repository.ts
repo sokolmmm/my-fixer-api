@@ -19,6 +19,6 @@ export default class Profile {
   @JoinColumn()
     user: User;
 
-  @ManyToOne(() => Stack, (stack) => stack.profile)
+  @ManyToOne(() => Stack, (stack) => stack.profile, { nullable: true })
     stack: Stack;
 }
