@@ -5,7 +5,7 @@ import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
 export default class UserService {
-  static async getUserById(id: number) {
+  static async getUserFromDB(id: number) {
     const user = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -34,7 +34,7 @@ export default class UserService {
   }
 
   static async retrieveUserById(id: string) {
-    const user = await this.getUserById(+id);
+    const user = await this.getUserFromDB(+id);
 
     if (!user) throw new NotFoundError(`User with id: ${id} doesn't exist`);
 
@@ -50,24 +50,32 @@ export default class UserService {
       user,
     });
 
-    const userInDB = await this.getUserById(user.id);
+    const userInDB = await this.getUserFromDB(user.id);
     return userInDB;
   }
 
   static async patchUser(id: string, payload: ICreateUserPayload) {
-    const user = await dataSource.createEntityManager().update(User, id, {
-      ...payload,
-    });
+    const user = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .update({ ...payload })
+      .where('id = :id', { id })
+      .execute();
 
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
 
-    const userInDB = await this.getUserById(+id);
+    const userInDB = await this.getUserFromDB(+id);
 
     return userInDB;
   }
 
   static async deleteById(id: string) {
-    const user = await dataSource.createEntityManager().delete(User, id);
+    const user = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .delete()
+      .where('id = :id', { id })
+      .execute();
 
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
   }

@@ -21,7 +21,7 @@ export interface ICreateUserPayload {
   title: string;
 }
 
-export interface ICreateProfilePayload {
+export interface IPatchProfilePayload {
   rating: number;
   stack: number;
 }
