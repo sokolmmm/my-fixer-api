@@ -1,5 +1,7 @@
 import Joi from 'joi';
 
+import Base64 from '../helpers/base64';
+
 import { ValidationError } from '../utils/errors';
 import {
   ICreateUserPayload,
@@ -48,9 +50,10 @@ class UserValidator {
   });
 
   private base64PhotoSchema = Joi.object({
-    photo: Joi.string().base64().max(2796202).messages({
-      'string.max': 'The picture must be smaller than 2 MB',
-    }),
+    // photo: Joi.string().base64().max(2796202).messages({
+    //   'string.max': 'The picture must be smaller than 2 MB',
+    // }),
+    photo: Joi.string(),
     extension: Joi.string().valid(
       EnumPhotoExtensions.JPEG,
       EnumPhotoExtensions.JPG,
@@ -77,7 +80,15 @@ class UserValidator {
 
   public validateUpdateUserPhoto(payload: IUpdateUserPhoto) {
     const result = this.updateUserPhotoSchema.validate(payload);
+
     if (result.error) throw new ValidationError(result.error.message);
+
+    const photo = Base64.getBody(payload.photo);
+    const extension = Base64.getExtension(payload.photo);
+
+    const base64Result = this.base64PhotoSchema.validate({ photo, extension });
+
+    if (base64Result.error) throw new ValidationError(base64Result.error.message);
   }
 
   public validateBase64Photo(payload: IBase64Photo) {
