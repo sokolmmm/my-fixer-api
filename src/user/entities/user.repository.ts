@@ -37,6 +37,11 @@ export default class User {
   })
     title: string;
 
+    @Column({
+      nullable: true,
+    })
+      photo: string;
+
   @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
 }

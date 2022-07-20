@@ -1,14 +1,12 @@
 import Koa from 'koa';
-import { config } from 'dotenv';
 import bodyParser from 'koa-bodyparser';
 
+import defaultConfig from '../config/default';
 import errorCatcher from './utils/middlewares/errorCatcher';
 import userRouter from './user/user.router';
 import databaseSource from './database/databaseConfig';
 import profileRouter from './profile/profile.router';
 import stackRouter from './stack/stack.router';
-
-config();
 
 databaseSource
   .initialize()
@@ -26,8 +24,8 @@ databaseSource
     app.use(profileRouter.routes());
     app.use(stackRouter.routes());
 
-    app.listen(process.env.PORT, () => {
-      console.log(`It works on port ${process.env.PORT}`);
+    app.listen(defaultConfig.port, () => {
+      console.log(`It works on port ${defaultConfig.port}`);
     });
   })
   .catch((error) => {

@@ -1,6 +1,7 @@
 import dataSource from '../database/databaseConfig';
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
+import awsS3 from '../utils/uploadS3';
 import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
@@ -78,5 +79,25 @@ export default class UserService {
       .execute();
 
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
+  }
+
+  static async updatePhoto(id: string, photo: string) {
+    let user = await this.getUserFromDB(+id);
+
+    if (!user) throw new NotFoundError(`User with id: ${id} doesn't exist`);
+
+    const savePhoto = await awsS3.uploadS3(photo, 'users', `photos_${user.email}`);
+    const photoUrl = savePhoto.toString();
+
+    await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .update({ photo: photoUrl })
+      .where('id = :id', { id })
+      .execute();
+
+    user = await this.getUserFromDB(+id);
+
+    return user;
   }
 }

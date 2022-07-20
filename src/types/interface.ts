@@ -12,6 +12,14 @@ export enum EnumPersonalTitles {
   MISS = 'miss',
 }
 
+export enum EnumPhotoExtensions {
+  JPEG = 'jpeg',
+  JPG = 'jpg',
+  PNG = 'png',
+  SVG = 'svg',
+  GIF = 'gif'
+}
+
 export interface ICreateUserPayload {
   firstName: string;
   lastName: string;
@@ -34,4 +42,13 @@ export interface ISearchUsersParams {
 
 export interface ICreateStackPayload {
   title: string;
+}
+
+export interface IUpdateUserPhoto {
+  photo: string;
+}
+
+export interface IBase64Photo {
+  photo: string;
+  extension: string,
 }

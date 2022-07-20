@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { Context } from 'koa';
 
 import UserService from './user.service';
 import userValidator from './user.validator';
+import Base64 from '../helpers/base64';
 import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 
 export default class UserController {
@@ -49,6 +51,22 @@ export default class UserController {
     const { userId } = ctx.params;
 
     const user = await UserService.deleteById(userId);
+
+    ctx.body = user;
+  }
+
+  static async updatePhoto(ctx: Context) {
+    const { userId } = ctx.params;
+    const { photo } = ctx.request.body;
+
+    userValidator.validateUpdateUserPhoto({ photo });
+
+    const extension = Base64.getExtension(photo);
+    const photoBody = Base64.getBody(photo);
+
+    userValidator.validateBase64Photo({ photo: photoBody, extension });
+
+    const user = await UserService.updatePhoto(userId, photo);
 
     ctx.body = user;
   }
