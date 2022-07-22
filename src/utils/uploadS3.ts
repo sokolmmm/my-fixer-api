@@ -2,7 +2,7 @@
 import { AWSError } from 'aws-sdk';
 
 import AWS from '../libs/aws';
-import defaultConfig from '../../config/default';
+import defaultConfig from '../config/default';
 import Base64 from '../helpers/base64';
 
 class AWSS3 {

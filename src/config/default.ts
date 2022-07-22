@@ -2,6 +2,11 @@ import dotenv from 'dotenv';
 
 interface IConfig {
   port: string;
+  secret: string,
+  jwt: {
+    accessSecret: string,
+    refreshSecret: string,
+  },
   database: {
     name: string;
     username: string;
@@ -18,6 +23,11 @@ dotenv.config();
 
 const defaultConfig: IConfig = {
   port: process.env.PORT,
+  secret: process.env.SECRET,
+  jwt: {
+    accessSecret: process.env.JWT_ACCESS_SECRET,
+    refreshSecret: process.env.JWT_REFRESH_SECRET,
+  },
   database: {
     name: process.env.DATABASE,
     username: process.env.DATABASE_USERNAME,

@@ -20,3 +20,9 @@ export class NotFoundError extends BaseError {
     super(message, 'NotFoundError', 404);
   }
 }
+
+export class AuthenticationError extends BaseError {
+  constructor(message: string) {
+    super(message, 'AuthenticationError', 401);
+  }
+}
