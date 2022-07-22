@@ -22,6 +22,7 @@ class UserValidator {
         tlds: { allow: ['com', 'net'] },
       })
       .required(),
+    password: Joi.string().min(3),
     country: Joi.string().min(3).max(10),
     phoneNumber: Joi.string().min(3).max(10),
     title: Joi.string().min(2).max(10),

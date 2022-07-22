@@ -1,5 +1,5 @@
 import AWS from 'aws-sdk';
-import defaultConfig from '../../config/default';
+import defaultConfig from '../config/default';
 
 const options = {
   accessKeyId: defaultConfig.asw.accessKeyId,

@@ -1,5 +1,10 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
+import { Context } from 'koa';
+import { JwtPayload } from 'jsonwebtoken';
+
+import User from '../user/entities/user.repository';
+
 export enum EnumOrderBy {
   ASC = 'ASC',
   DESC = 'DESC',
@@ -24,6 +29,7 @@ export interface ICreateUserPayload {
   firstName: string;
   lastName: string;
   email: string;
+  password: string,
   country: string;
   phoneNumber: string;
   title: string;
@@ -51,4 +57,37 @@ export interface IUpdateUserPhoto {
 export interface IBase64Photo {
   photo: string;
   extension: string,
+}
+
+export interface IAppContext extends Context {
+ user: User,
+}
+
+export interface IUserTokenPayload extends JwtPayload {
+  id: number,
+  email?: string,
+}
+
+export interface IUserInfo {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  country: string;
+  phoneNumber: string;
+  title: string;
+  photo: string;
+  profile: {
+    id: number;
+    rating: number;
+    stack: {
+      id: number,
+      title: string,
+    };
+  };
+}
+
+export interface IUserAuth extends IUserInfo {
+  accessToken: string,
+  refreshToken: string,
 }

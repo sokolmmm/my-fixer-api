@@ -1,8 +1,8 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 
-import defaultConfig from '../config/default';
-import errorCatcher from './utils/middlewares/errorCatcher';
+import defaultConfig from './config/default';
+import errorCatcher from './utils/middleware/errorCatcher';
 import userRouter from './user/user.router';
 import databaseSource from './database/databaseConfig';
 import profileRouter from './profile/profile.router';

@@ -1,19 +1,27 @@
-/* eslint-disable no-unused-vars */
 import { Context } from 'koa';
 
 import UserService from './user.service';
 import userValidator from './user.validator';
-import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
+
+import { ICreateUserPayload, ISearchUsersParams, IAppContext } from '../types/interface';
 
 export default class UserController {
-  static async usersList(ctx: Context) {
+  static async signIn(ctx: IAppContext) {
+    const user = ctx.user.auth();
+
+    await UserService.signIn(user);
+
+    ctx.body = user;
+  }
+
+  static async usersList(ctx: IAppContext) {
     const searchParams: ISearchUsersParams = ctx.query;
 
     userValidator.validateSearchUsersParams(searchParams);
 
     const users = await UserService.usersList(searchParams);
 
-    ctx.body = users;
+    ctx.body = users.map((user) => user.info());
   }
 
   static async retrieveUserById(ctx: Context) {

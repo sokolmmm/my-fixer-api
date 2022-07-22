@@ -14,5 +14,5 @@
       "*": ["node_modules/*"]
     }
   },
-  "include": ["src/**/*", "src/configs", "config"]
+  "include": ["src/**/*", "src/configs", "src/config"]
 }

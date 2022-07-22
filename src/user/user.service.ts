@@ -2,7 +2,7 @@ import dataSource from '../database/databaseConfig';
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
 import awsS3 from '../utils/uploadS3';
-import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
+import { ICreateUserPayload, ISearchUsersParams, IUserAuth } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
 export default class UserService {
@@ -17,6 +17,10 @@ export default class UserService {
       .getOne();
 
     return user;
+  }
+
+  static async signIn(payload: IUserAuth) {
+    return payload;
   }
 
   static async usersList(params: ISearchUsersParams) {
@@ -43,8 +47,11 @@ export default class UserService {
   }
 
   static async createUser(payload: ICreateUserPayload) {
+    const passwordHash = User.createPassword(payload.password);
+
     const user = await dataSource.createEntityManager().save(User, {
       ...payload,
+      password: passwordHash,
     });
 
     await dataSource.createEntityManager().save(Profile, {
