@@ -51,11 +51,6 @@ export default class User {
   })
     photo: string;
 
-  // @Column({
-  //   nullable: true,
-  // })
-  //   refreshToken: string;
-
   @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
 

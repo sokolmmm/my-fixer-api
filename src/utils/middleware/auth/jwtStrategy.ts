@@ -6,25 +6,34 @@ import dataSource from '../../../database/databaseConfig';
 import defaultConfig from '../../../config/default';
 
 import { IAppContext, IUserTokenPayload } from '../../../types/interface';
-import { ValidationError, AuthenticationError } from '../../errors';
+import { UnauthorizedError } from '../../errors';
 
 export default async function jwtStrategy(ctx: IAppContext, next: () => Promise<any>) {
-  const header = ctx.header.authorization;
+  try {
+    const header = ctx.header.authorization;
 
-  const [prefix, token] = header.split(' ');
+    const [prefix, token] = header.split(' ');
 
-  const payload: IUserTokenPayload = jwt.verify(token, defaultConfig.jwt.accessSecret) as IUserTokenPayload;
+    if (prefix !== 'Bearer') throw new UnauthorizedError('The user is not authorized to access this resource');
 
-  const user = await dataSource
-    .getRepository(User)
-    .createQueryBuilder('user')
-    .leftJoinAndSelect('user.profile', 'profile')
-    .leftJoinAndSelect('profile.stack', 'stack')
-    .select(['user', 'profile.rating', 'stack.title'])
-    .where('user.id = :id', { id: payload.id })
-    .getOne();
+    const payload: IUserTokenPayload = jwt.verify(
+      token,
+      defaultConfig.jwt.accessSecret,
+    ) as IUserTokenPayload;
 
-  ctx.user = user;
+    const user = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('profile.stack', 'stack')
+      .select(['user', 'profile.rating', 'stack.title'])
+      .where('user.id = :id', { id: payload.id })
+      .getOne();
 
-  await next();
+    ctx.user = user;
+
+    await next();
+  } catch (error: any | UnauthorizedError) {
+    throw new UnauthorizedError('The user is not authorized to access this resource');
+  }
 }

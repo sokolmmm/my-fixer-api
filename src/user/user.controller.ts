@@ -9,7 +9,19 @@ export default class UserController {
   static async signIn(ctx: IAppContext) {
     const user = ctx.user.auth();
 
+    ctx.cookies.set('refresh', user.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+
     await UserService.signIn(user);
+
+    ctx.body = user;
+  }
+
+  static async createUser(ctx: Context) {
+    const payload: ICreateUserPayload = ctx.request.body;
+
+    userValidator.validateCreateUserPayload(payload);
+
+    const user = await UserService.createUser(payload);
 
     ctx.body = user;
   }
@@ -28,16 +40,6 @@ export default class UserController {
     const { userId } = ctx.params;
 
     const user = await UserService.retrieveUserById(userId);
-
-    ctx.body = user;
-  }
-
-  static async createUser(ctx: Context) {
-    const payload: ICreateUserPayload = ctx.request.body;
-
-    userValidator.validateCreateUserPayload(payload);
-
-    const user = await UserService.createUser(payload);
 
     ctx.body = user;
   }

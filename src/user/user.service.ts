@@ -1,7 +1,9 @@
 import dataSource from '../database/databaseConfig';
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
+import Token from './entities/token.repository';
 import awsS3 from '../utils/uploadS3';
+
 import { ICreateUserPayload, ISearchUsersParams, IUserAuth } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
@@ -20,7 +22,30 @@ export default class UserService {
   }
 
   static async signIn(payload: IUserAuth) {
-    return payload;
+    const { id, refreshToken } = payload;
+
+    const tokenInDB = await dataSource.getRepository(Token)
+      .createQueryBuilder('token')
+      .where('token.userId = :userId', { userId: id })
+      .getOne();
+
+    if (tokenInDB && tokenInDB.refreshToken) {
+      const token = await dataSource
+        .getRepository(Token)
+        .createQueryBuilder('token')
+        .update({ refreshToken })
+        .where('token.userId = :userId', { userId: id })
+        .execute();
+
+      return token;
+    }
+
+    const token = await dataSource.createEntityManager().save(Token, {
+      userId: id,
+      refreshToken,
+    });
+
+    return token;
   }
 
   static async usersList(params: ISearchUsersParams) {

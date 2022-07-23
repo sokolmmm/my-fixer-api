@@ -2,7 +2,7 @@ import User from '../../../user/entities/user.repository';
 import dataSource from '../../../database/databaseConfig';
 
 import { IAppContext } from '../../../types/interface';
-import { ValidationError, AuthenticationError } from '../../errors';
+import { ValidationError, UnauthorizedError } from '../../errors';
 
 export default async function localStrategy(ctx: IAppContext, next: () => Promise<any>) {
   const { body } = ctx.request;
@@ -22,7 +22,7 @@ export default async function localStrategy(ctx: IAppContext, next: () => Promis
     .andWhere('password = :password', { password: passwordHash })
     .getOne();
 
-  if (!user) throw new AuthenticationError('E-mail or password is wrong');
+  if (!user) throw new UnauthorizedError('E-mail or password is wrong');
 
   ctx.user = user;
 
