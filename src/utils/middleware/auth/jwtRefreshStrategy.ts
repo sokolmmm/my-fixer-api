@@ -8,16 +8,13 @@ import defaultConfig from '../../../config/default';
 import { IAppContext, IUserTokenPayload } from '../../../types/interface';
 import { UnauthorizedError } from '../../errors';
 
-export default async function jwtStrategy(ctx: IAppContext, next: () => Promise<any>) {
+export default async function jwtRefreshStrategy(ctx: IAppContext, next: () => Promise<any>) {
   try {
-    const header = ctx.header.authorization;
-    const [prefix, token] = header.split(' ');
-
-    if (prefix !== 'Bearer') throw new UnauthorizedError('The user is not authorized to access this resource');
+    const refreshToken = ctx.cookies.get('refresh');
 
     const payload: IUserTokenPayload = jwt.verify(
-      token,
-      defaultConfig.jwt.accessSecret,
+      refreshToken,
+      defaultConfig.jwt.refreshSecret,
     ) as IUserTokenPayload;
 
     const user = await dataSource

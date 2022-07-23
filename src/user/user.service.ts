@@ -1,11 +1,10 @@
 import dataSource from '../database/databaseConfig';
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
-import Token from './entities/token.repository';
 import awsS3 from '../utils/uploadS3';
 
-import { ICreateUserPayload, ISearchUsersParams, IUserAuth } from '../types/interface';
-import { NotFoundError } from '../utils/errors';
+import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
+import { NotFoundError, ConflictError } from '../utils/errors';
 
 export default class UserService {
   private static async getUserFromDB(id: number) {
@@ -19,33 +18,6 @@ export default class UserService {
       .getOne();
 
     return user;
-  }
-
-  static async signIn(payload: IUserAuth) {
-    const { id, refreshToken } = payload;
-
-    const tokenInDB = await dataSource.getRepository(Token)
-      .createQueryBuilder('token')
-      .where('token.userId = :userId', { userId: id })
-      .getOne();
-
-    if (tokenInDB && tokenInDB.refreshToken) {
-      const token = await dataSource
-        .getRepository(Token)
-        .createQueryBuilder('token')
-        .update({ refreshToken })
-        .where('token.userId = :userId', { userId: id })
-        .execute();
-
-      return token;
-    }
-
-    const token = await dataSource.createEntityManager().save(Token, {
-      userId: id,
-      refreshToken,
-    });
-
-    return token;
   }
 
   static async usersList(params: ISearchUsersParams) {
@@ -72,22 +44,26 @@ export default class UserService {
   }
 
   static async createUser(payload: ICreateUserPayload) {
-    const passwordHash = User.createPassword(payload.password);
+    try {
+      const passwordHash = User.createPassword(payload.password);
+      const user = await dataSource.createEntityManager().save(User, {
+        ...payload,
+        password: passwordHash,
+      });
 
-    const user = await dataSource.createEntityManager().save(User, {
-      ...payload,
-      password: passwordHash,
-    });
+      await dataSource.createEntityManager().save(Profile, {
+        user,
+      });
 
-    await dataSource.createEntityManager().save(Profile, {
-      user,
-    });
+      const userInDB = await this.getUserFromDB(user.id);
 
-    const userInDB = await this.getUserFromDB(user.id);
-    return userInDB;
+      return userInDB;
+    } catch (error: any | ConflictError) {
+      throw new ConflictError(`The user with email: ${payload.email} is already exist`);
+    }
   }
 
-  static async patchUser(id: string, payload: ICreateUserPayload) {
+  static async patchUser(id: number, payload: ICreateUserPayload) {
     const user = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -97,12 +73,12 @@ export default class UserService {
 
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
 
-    const userInDB = await this.getUserFromDB(+id);
+    const userInDB = await this.getUserFromDB(id);
 
     return userInDB;
   }
 
-  static async deleteById(id: string) {
+  static async deleteById(id: number) {
     const user = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -113,10 +89,8 @@ export default class UserService {
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
   }
 
-  static async updatePhoto(id: string, photo: string) {
-    let user = await this.getUserFromDB(+id);
-
-    if (!user) throw new NotFoundError(`User with id: ${id} doesn't exist`);
+  static async updatePhoto(id: number, photo: string) {
+    let user = await this.getUserFromDB(id);
 
     const savePhoto = await awsS3.uploadS3(photo, 'users', `photos_${user.email}`);
     const photoUrl = savePhoto.toString();
@@ -128,7 +102,7 @@ export default class UserService {
       .where('id = :id', { id })
       .execute();
 
-    user = await this.getUserFromDB(+id);
+    user = await this.getUserFromDB(id);
 
     return user;
   }

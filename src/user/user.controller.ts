@@ -6,16 +6,6 @@ import userValidator from './user.validator';
 import { ICreateUserPayload, ISearchUsersParams, IAppContext } from '../types/interface';
 
 export default class UserController {
-  static async signIn(ctx: IAppContext) {
-    const user = ctx.user.auth();
-
-    ctx.cookies.set('refresh', user.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
-
-    await UserService.signIn(user);
-
-    ctx.body = user;
-  }
-
   static async createUser(ctx: Context) {
     const payload: ICreateUserPayload = ctx.request.body;
 
@@ -44,34 +34,35 @@ export default class UserController {
     ctx.body = user;
   }
 
-  static async patchUserById(ctx: Context) {
-    const { userId } = ctx.params;
+  static async patchUserById(ctx: IAppContext) {
+    const { id } = ctx.user;
 
     const payload: ICreateUserPayload = ctx.request.body;
 
     userValidator.validatePatchUserPayload(payload);
 
-    const user = await UserService.patchUser(userId, payload);
+    const user = await UserService.patchUser(id, payload);
+
+    ctx.body = user.info();
+  }
+
+  static async deleteUserById(ctx: IAppContext) {
+    const { id } = ctx.user;
+
+    const user = await UserService.deleteById(id);
 
     ctx.body = user;
   }
 
-  static async deleteUserById(ctx: Context) {
-    const { userId } = ctx.params;
+  static async updatePhoto(ctx: IAppContext) {
+    const { user } = ctx;
 
-    const user = await UserService.deleteById(userId);
-
-    ctx.body = user;
-  }
-
-  static async updatePhoto(ctx: Context) {
-    const { userId } = ctx.params;
     const { photo } = ctx.request.body;
 
     userValidator.validateUpdateUserPhoto({ photo });
 
-    const user = await UserService.updatePhoto(userId, photo);
+    await UserService.updatePhoto(user.id, photo);
 
-    ctx.body = user;
+    ctx.body = user.info();
   }
 }
