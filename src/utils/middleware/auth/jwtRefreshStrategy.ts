@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import jwt from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 
 import User from '../../../user/entities/user.repository';
 import dataSource from '../../../database/databaseConfig';
@@ -10,7 +9,10 @@ import { UnauthorizedError } from '../../errors';
 
 export default async function jwtRefreshStrategy(ctx: IAppContext, next: () => Promise<any>) {
   try {
-    const refreshToken = ctx.cookies.get('refresh');
+    const header = ctx.header.authorization;
+    const [prefix, refreshToken] = header.split(' ');
+
+    if (prefix !== 'Bearer') { throw new UnauthorizedError('The user is not authorized to access this resource'); }
 
     const payload: IUserTokenPayload = jwt.verify(
       refreshToken,
@@ -28,6 +30,9 @@ export default async function jwtRefreshStrategy(ctx: IAppContext, next: () => P
 
     ctx.user = user;
   } catch (error: any | UnauthorizedError) {
+    if (error instanceof TokenExpiredError) {
+      throw new UnauthorizedError('TokenExpiredError');
+    }
     throw new UnauthorizedError('The user is not authorized to access this resource');
   }
 

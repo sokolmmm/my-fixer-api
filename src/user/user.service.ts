@@ -56,7 +56,8 @@ export default class UserService {
         user,
       });
 
-      mailService.sendActivationMail(user.email, 'link');
+      mailService.sendActivationMail(user.email, `http://localhost:3000/auth/confirm-email/${user.id}`);
+
       const userInDB = await this.getUserFromDB(user.id);
 
       return userInDB;
@@ -105,6 +106,7 @@ export default class UserService {
       .execute();
 
     user = await this.getUserFromDB(id);
+    console.log(user.photo);
 
     return user;
   }

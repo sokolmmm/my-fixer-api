@@ -61,8 +61,8 @@ export default class UserController {
 
     userValidator.validateUpdateUserPhoto({ photo });
 
-    await UserService.updatePhoto(user.id, photo);
+    const userPhoto = await UserService.updatePhoto(user.id, photo);
 
-    ctx.body = user.info();
+    ctx.body = userPhoto;
   }
 }

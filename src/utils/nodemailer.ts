@@ -24,13 +24,24 @@ class MailService {
     await this.transporter.sendMail({
       from: defaultConfig.nodemailer.auth.user,
       to,
-      subject: 'Account activation: ',
+      subject: 'Please Activate E-mail Address',
       text: '',
       html:
         `
             <div>
-                <h1>For activation </h1>
+                <p>
+                  Hello from MyFixer Company!<br>
+                  Please click on the link below to verify your e-mail address:
+                <p>
                 <a href="${link}">${link}</a>
+                <p>
+                  If your e-mail program does not recognize the above link as an active link,
+                  please copy and paste it into your Web browser.
+                </p>
+                <p>
+                  Kindest regards,<br>
+                  MyFixer.com
+                </p>
             </div>
         `,
     });

@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import jwt from 'jsonwebtoken';
+import jwt, { TokenExpiredError } from 'jsonwebtoken';
 
 import User from '../../../user/entities/user.repository';
 import dataSource from '../../../database/databaseConfig';
@@ -31,6 +30,9 @@ export default async function jwtStrategy(ctx: IAppContext, next: () => Promise<
 
     ctx.user = user;
   } catch (error: any | UnauthorizedError) {
+    if (error instanceof TokenExpiredError) {
+      throw new UnauthorizedError('TokenExpiredError');
+    }
     throw new UnauthorizedError('The user is not authorized to access this resource');
   }
 

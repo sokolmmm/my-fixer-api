@@ -1,12 +1,12 @@
-// import { fileTypeFromBuffer } from 'file-type';
-import { AWSError } from 'aws-sdk';
+import { AWSError, S3 } from 'aws-sdk';
 
+import { CreateBucketOutput } from 'aws-sdk/clients/s3';
 import AWS from '../libs/aws';
 import defaultConfig from '../config/default';
 import Base64 from '../helpers/base64';
 
 class AWSS3 {
-  s3: any;
+  s3: S3.Types;
 
   constructor() {
     this.s3 = new AWS.S3();
@@ -24,13 +24,12 @@ class AWSS3 {
         {
           Bucket: defaultConfig.asw.bucketName,
           Key: filename,
-          Prefix: `${folder}/${subfolder}`,
           Body: base64Data,
           ContentEncoding: 'base64',
           ContentType: `image/${ext}`,
           ACL: 'public-read',
         },
-        (err: AWSError, data: { Location: string }) => {
+        (err: AWSError, data: CreateBucketOutput) => {
           if (err) {
             return reject(err);
           }
