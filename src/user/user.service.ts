@@ -2,6 +2,7 @@ import dataSource from '../database/databaseConfig';
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
 import awsS3 from '../utils/uploadS3';
+import mailService from '../utils/nodemailer';
 
 import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 import { NotFoundError, ConflictError } from '../utils/errors';
@@ -55,6 +56,7 @@ export default class UserService {
         user,
       });
 
+      mailService.sendActivationMail(user.email, 'link');
       const userInDB = await this.getUserFromDB(user.id);
 
       return userInDB;
