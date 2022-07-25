@@ -15,14 +15,20 @@ export class ValidationError extends BaseError {
   }
 }
 
+export class UnauthorizedError extends BaseError {
+  constructor(message: string) {
+    super(message, 'UnauthorizedError', 401);
+  }
+}
+
 export class NotFoundError extends BaseError {
   constructor(message: string) {
     super(message, 'NotFoundError', 404);
   }
 }
 
-export class AuthenticationError extends BaseError {
+export class ConflictError extends BaseError {
   constructor(message: string) {
-    super(message, 'AuthenticationError', 401);
+    super(message, 'ConflictError', 409);
   }
 }

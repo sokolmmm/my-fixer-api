@@ -23,7 +23,9 @@ export default class User {
   @Column()
     lastName: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
     email: string;
 
   @Column()
@@ -50,11 +52,6 @@ export default class User {
     nullable: true,
   })
     photo: string;
-
-  // @Column({
-  //   nullable: true,
-  // })
-  //   refreshToken: string;
 
   @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
@@ -86,8 +83,8 @@ export default class User {
       email: this.email,
     };
 
-    const accessToken: string = jwt.sign(payload, defaultConfig.jwt.accessSecret, { expiresIn: '10m' });
-    const refreshToken: string = jwt.sign(payload, defaultConfig.jwt.refreshSecret, { expiresIn: '10m' });
+    const accessToken: string = jwt.sign(payload, defaultConfig.jwt.accessSecret, { expiresIn: '15m' });
+    const refreshToken: string = jwt.sign(payload, defaultConfig.jwt.refreshSecret, { expiresIn: '30d' });
 
     return {
       ...this.info(),
