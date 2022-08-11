@@ -11,6 +11,7 @@ interface IConfig {
   jwt: {
     accessSecret: string;
     refreshSecret: string;
+    activationLink: string;
   };
   asw: {
     accessKeyId: string;
@@ -40,6 +41,8 @@ const defaultConfig: IConfig = {
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
+    activationLink: process.env.JWT_ACTIVATION_LINK,
+
   },
   asw: {
     accessKeyId: process.env.ASW_ACCESS_KEY,

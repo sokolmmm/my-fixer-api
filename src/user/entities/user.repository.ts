@@ -53,6 +53,12 @@ export default class User {
   })
     photo: string;
 
+  @Column({
+    // type: 'boolean',
+    default: false,
+  })
+    isEmailVerified: boolean;
+
   @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
 
@@ -83,13 +89,30 @@ export default class User {
       email: this.email,
     };
 
-    const accessToken: string = jwt.sign(payload, defaultConfig.jwt.accessSecret, { expiresIn: '15m' });
-    const refreshToken: string = jwt.sign(payload, defaultConfig.jwt.refreshSecret, { expiresIn: '30d' });
+    const accessToken: string = jwt.sign(payload, defaultConfig.jwt.accessSecret, {
+      expiresIn: '15m',
+    });
+    const refreshToken: string = jwt.sign(payload, defaultConfig.jwt.refreshSecret, {
+      expiresIn: '15d',
+    });
 
     return {
       ...this.info(),
-      accessToken,
-      refreshToken,
+      tokens: {
+        accessToken,
+        refreshToken,
+      },
     };
+  }
+
+  public activationLink(): string {
+    const payload: IUserTokenPayload = {
+      id: this.id,
+      email: this.email,
+    };
+    const activationLinkToken = jwt.sign(payload, defaultConfig.jwt.activationLink, {
+      expiresIn: '1d',
+    });
+    return activationLinkToken;
   }
 }

@@ -22,14 +22,21 @@ export enum EnumPhotoExtensions {
   JPG = 'jpg',
   PNG = 'png',
   SVG = 'svg',
-  GIF = 'gif'
+  GIF = 'gif',
+}
+
+export enum PostgresErrorCode {
+  UniqueViolation = '23505',
+  CheckViolation = '23514',
+  NotNullViolation = '23502',
+  ForeignKeyViolation = '23503',
 }
 
 export interface ICreateUserPayload {
   firstName: string;
   lastName: string;
   email: string;
-  password: string,
+  password: string;
   country: string;
   phoneNumber: string;
   title: string;
@@ -56,16 +63,16 @@ export interface IUpdateUserPhoto {
 
 export interface IBase64Photo {
   photo: string;
-  extension: string,
+  extension: string;
 }
 
 export interface IAppContext extends Context {
- user: User,
+  user: User;
 }
 
 export interface IUserTokenPayload extends JwtPayload {
-  id: number,
-  email?: string,
+  id: number;
+  email?: string;
 }
 
 export interface IUserInfo {
@@ -81,13 +88,15 @@ export interface IUserInfo {
     id: number;
     rating: number;
     stack: {
-      id: number,
-      title: string,
+      id: number;
+      title: string;
     };
   };
 }
 
 export interface IUserAuth extends IUserInfo {
-  accessToken: string,
-  refreshToken: string,
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }

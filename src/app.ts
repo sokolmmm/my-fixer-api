@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
 
 import databaseSource from './database/databaseConfig';
 import defaultConfig from './config/default';
@@ -20,6 +21,7 @@ databaseSource
       }),
     );
 
+    app.use(cors());
     app.use(errorCatcher);
     app.use(authRouter.routes());
     app.use(userRouter.routes());

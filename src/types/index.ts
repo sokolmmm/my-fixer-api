@@ -2,6 +2,7 @@ export {
   EnumOrderBy,
   EnumPersonalTitles,
   EnumPhotoExtensions,
+  PostgresErrorCode,
   ICreateUserPayload,
   IPatchProfilePayload,
   ISearchUsersParams,

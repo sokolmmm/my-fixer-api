@@ -1,10 +1,11 @@
-import dataSource from '../database/databaseConfig';
+/* eslint-disable no-unused-vars */
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
 import awsS3 from '../utils/uploadS3';
+import dataSource from '../database/databaseConfig';
 import mailService from '../utils/nodemailer';
 
-import { ICreateUserPayload, ISearchUsersParams } from '../types/interface';
+import { ICreateUserPayload, ISearchUsersParams, PostgresErrorCode } from '../types';
 import { NotFoundError, ConflictError } from '../utils/errors';
 
 export default class UserService {
@@ -15,10 +16,38 @@ export default class UserService {
       .leftJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('profile.stack', 'stack')
       .select(['user', 'profile.rating', 'stack.title'])
-      .where({ id: +id })
+      .where({ id })
       .getOne();
 
     return user;
+  }
+
+  static async createUser(payload: ICreateUserPayload) {
+    try {
+      const passwordHash = User.createPassword(payload.password);
+      const user = await dataSource.createEntityManager().save(User, {
+        ...payload,
+        password: passwordHash,
+      });
+
+      await dataSource.createEntityManager().save(Profile, {
+        user,
+      });
+
+      const userInDB = await this.getUserFromDB(user.id);
+
+      await mailService.sendActivationMail(
+        user.email,
+        `http://localhost:4000/users/confirm-email/${userInDB.activationLink()}`,
+      );
+
+      return userInDB;
+    } catch (error: any | ConflictError) {
+      if (error.code === PostgresErrorCode.UniqueViolation) {
+        throw new ConflictError(`The user with email: ${payload.email} is already exist`);
+      }
+      throw error;
+    }
   }
 
   static async usersList(params: ISearchUsersParams) {
@@ -36,34 +65,12 @@ export default class UserService {
     return users;
   }
 
-  static async retrieveUserById(id: string) {
-    const user = await this.getUserFromDB(+id);
+  static async retrieveUserById(id: number) {
+    const user = await this.getUserFromDB(id);
 
     if (!user) throw new NotFoundError(`User with id: ${id} doesn't exist`);
 
     return user;
-  }
-
-  static async createUser(payload: ICreateUserPayload) {
-    try {
-      const passwordHash = User.createPassword(payload.password);
-      const user = await dataSource.createEntityManager().save(User, {
-        ...payload,
-        password: passwordHash,
-      });
-
-      await dataSource.createEntityManager().save(Profile, {
-        user,
-      });
-
-      mailService.sendActivationMail(user.email, `http://localhost:3000/auth/confirm-email/${user.id}`);
-
-      const userInDB = await this.getUserFromDB(user.id);
-
-      return userInDB;
-    } catch (error: any | ConflictError) {
-      throw new ConflictError(`The user with email: ${payload.email} is already exist`);
-    }
   }
 
   static async patchUser(id: number, payload: ICreateUserPayload) {
@@ -75,10 +82,6 @@ export default class UserService {
       .execute();
 
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
-
-    const userInDB = await this.getUserFromDB(id);
-
-    return userInDB;
   }
 
   static async deleteById(id: number) {
@@ -92,10 +95,8 @@ export default class UserService {
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
   }
 
-  static async updatePhoto(id: number, photo: string) {
-    let user = await this.getUserFromDB(id);
-
-    const savePhoto = await awsS3.uploadS3(photo, 'users', `photos_${user.email}`);
+  static async updatePhoto(id: number, email: string, photo: string) {
+    const savePhoto = await awsS3.uploadS3(photo, 'users', `photos_${email}`);
     const photoUrl = savePhoto.toString();
 
     await dataSource
@@ -104,10 +105,33 @@ export default class UserService {
       .update({ photo: photoUrl })
       .where('id = :id', { id })
       .execute();
+  }
 
-    user = await this.getUserFromDB(id);
-    console.log(user.photo);
+  static async confirmEmail(user: User) {
+    if (user.isEmailVerified) throw new ConflictError(`E-mail: ${user.email} is already verified`);
 
-    return user;
+    await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .update({ isEmailVerified: true })
+      .where('id = :id', { id: user.id })
+      .execute();
+  }
+
+  static async resetPassword(email: string) {
+    const user = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .where({ email })
+      .getOne();
+
+    if (!user) throw new NotFoundError(`User with e-mail: ${email} doesn't exist`);
+
+    await mailService.sendResetPasswordMail(
+      user.email,
+      `http://localhost:4000/users/confirm-email/${user.activationLink()}`,
+    );
+
+    return `An email was sent to ${email}`;
   }
 }

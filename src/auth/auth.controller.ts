@@ -1,5 +1,3 @@
-// import AuthService from './auth.service';
-
 import { IAppContext } from '../types/interface';
 
 export default class AuthController {

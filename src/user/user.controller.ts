@@ -13,7 +13,7 @@ export default class UserController {
 
     const user = await UserService.createUser(payload);
 
-    ctx.body = user;
+    ctx.body = user.info();
   }
 
   static async usersList(ctx: IAppContext) {
@@ -26,22 +26,22 @@ export default class UserController {
     ctx.body = users.map((user) => user.info());
   }
 
-  static async retrieveUserById(ctx: Context) {
-    const { userId } = ctx.params;
-
-    const user = await UserService.retrieveUserById(userId);
-
-    ctx.body = user;
-  }
-
   static async patchUserById(ctx: IAppContext) {
-    const { id } = ctx.user;
+    const { user } = ctx;
 
     const payload: ICreateUserPayload = ctx.request.body;
 
     userValidator.validatePatchUserPayload(payload);
 
-    const user = await UserService.patchUser(id, payload);
+    await UserService.patchUser(user.id, payload);
+
+    ctx.body = user.info();
+  }
+
+  static async retrieveUserById(ctx: IAppContext) {
+    const { userId } = ctx.params;
+
+    const user = await UserService.retrieveUserById(userId);
 
     ctx.body = user.info();
   }
@@ -61,8 +61,23 @@ export default class UserController {
 
     userValidator.validateUpdateUserPhoto({ photo });
 
-    const userPhoto = await UserService.updatePhoto(user.id, photo);
+    await UserService.updatePhoto(user.id, user.email, photo);
 
-    ctx.body = userPhoto;
+    ctx.body = user.info();
+  }
+
+  static async confirmEmail(ctx: IAppContext) {
+    const { user } = ctx;
+
+    await UserService.confirmEmail(user);
+    ctx.redirect('http://localhost:3000/sign-up/complete-account-successful');
+  }
+
+  static async resetPassword(ctx: Context) {
+    const { email } = ctx.request.body;
+
+    const user = await UserService.resetPassword(email);
+
+    ctx.body = user;
   }
 }

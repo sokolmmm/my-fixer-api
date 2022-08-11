@@ -1,7 +1,6 @@
 import Joi from 'joi';
 
 import Base64 from '../helpers/base64';
-
 import { ValidationError } from '../utils/errors';
 import {
   ICreateUserPayload,
@@ -14,17 +13,17 @@ import {
 
 class UserValidator {
   private createUserSchema = Joi.object({
-    firstName: Joi.string().min(3).max(10).required(),
-    lastName: Joi.string().min(3).max(10).required(),
+    firstName: Joi.string().min(3).max(15).required(),
+    lastName: Joi.string().min(3).max(15).required(),
     email: Joi.string()
       .email({
         minDomainSegments: 2,
         tlds: { allow: ['com', 'net'] },
       })
       .required(),
-    password: Joi.string().min(3),
-    country: Joi.string().min(3).max(10),
-    phoneNumber: Joi.string().min(3).max(10),
+    password: Joi.string().min(3).max(15).required(),
+    country: Joi.string().min(3).max(35),
+    phoneNumber: Joi.string().min(3).max(15),
     title: Joi.string().min(2).max(10),
   });
 
@@ -35,7 +34,7 @@ class UserValidator {
       minDomainSegments: 2,
       tlds: { allow: ['com', 'net'] },
     }),
-    country: Joi.string().min(3).max(10),
+    country: Joi.string().min(3).max(25),
     phoneNumber: Joi.string().min(3).max(10),
     title: Joi.string().min(2).max(10),
   });
