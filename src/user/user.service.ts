@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import User from './entities/user.repository';
 import Profile from '../profile/entities/profile.repository';
+import PasswordReset from './entities/passwordReset.repository';
 import awsS3 from '../utils/uploadS3';
 import dataSource from '../database/databaseConfig';
 import mailService from '../utils/nodemailer';
@@ -24,7 +25,7 @@ export default class UserService {
 
   static async createUser(payload: ICreateUserPayload) {
     try {
-      const passwordHash = User.createPassword(payload.password);
+      const passwordHash = User.createPasswordHash(payload.password);
       const user = await dataSource.createEntityManager().save(User, {
         ...payload,
         password: passwordHash,
@@ -38,7 +39,7 @@ export default class UserService {
 
       await mailService.sendActivationMail(
         user.email,
-        `http://localhost:4000/users/confirm-email/${userInDB.activationLink()}`,
+        `http://localhost:4000/users/confirm-email/${userInDB.createLink()}`,
       );
 
       return userInDB;
@@ -118,7 +119,7 @@ export default class UserService {
       .execute();
   }
 
-  static async resetPassword(email: string) {
+  static async sendResetPasswordMail(email: string) {
     const user = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -127,11 +128,36 @@ export default class UserService {
 
     if (!user) throw new NotFoundError(`User with e-mail: ${email} doesn't exist`);
 
-    await mailService.sendResetPasswordMail(
-      user.email,
-      `http://localhost:4000/users/confirm-email/${user.activationLink()}`,
-    );
+    const verifyCode = PasswordReset.createCode();
+    const codeHash = PasswordReset.createCodeHash(verifyCode);
+
+    await dataSource.createEntityManager().save(PasswordReset, {
+      codeHash,
+      user,
+    });
+
+    await mailService.sendResetPasswordMail(user.email, verifyCode);
 
     return `An email was sent to ${email}`;
+  }
+
+  static async resetPassword(email: string, password: string) {
+    const passwordHash = User.createPasswordHash(password);
+
+    const userPromise = dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .update({ password: passwordHash })
+      .where({ email })
+      .execute();
+
+    const passwordPromise = dataSource
+      .getRepository(PasswordReset)
+      .createQueryBuilder('password_reset')
+      .delete()
+      .where('password_reset.email = :email', { email })
+      .execute();
+
+    await Promise.all([userPromise, passwordPromise]);
   }
 }

@@ -10,7 +10,7 @@ export default async function localStrategy(ctx: IAppContext, next: () => Promis
   if (typeof body.password !== 'string') throw new ValidationError('Password must be a string');
   if (typeof body.email !== 'string') throw new ValidationError('E-mail must be a string');
 
-  const passwordHash = User.createPassword(body.password);
+  const passwordHash = User.createPasswordHash(body.password);
 
   const user = await dataSource
     .getRepository(User)

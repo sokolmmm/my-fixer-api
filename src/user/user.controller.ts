@@ -73,11 +73,19 @@ export default class UserController {
     ctx.redirect('http://localhost:3000/sign-up/complete-account-successful');
   }
 
-  static async resetPassword(ctx: Context) {
+  static async sendResetPasswordMail(ctx: Context) {
     const { email } = ctx.request.body;
 
-    const user = await UserService.resetPassword(email);
+    const user = await UserService.sendResetPasswordMail(email);
 
     ctx.body = user;
+  }
+
+  static async resetPassword(ctx: IAppContext) {
+    const { email, password } = ctx.request.body;
+
+    await UserService.resetPassword(email, password);
+
+    ctx.body = 'The password was changed successfully';
   }
 }

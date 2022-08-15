@@ -1,13 +1,15 @@
 /* eslint-disable import/no-cycle */
 import jwt from 'jsonwebtoken';
 
+import { createHmac } from 'node:crypto';
 import {
   Entity, PrimaryGeneratedColumn, Column, OneToOne,
 } from 'typeorm';
-import { createHmac } from 'node:crypto';
 
-import defaultConfig from '../../config/default';
 import Profile from '../../profile/entities/profile.repository';
+import PasswordReset from './passwordReset.repository';
+import defaultConfig from '../../config/default';
+
 import {
   EnumPersonalTitles, IUserTokenPayload, IUserInfo, IUserAuth,
 } from '../../types';
@@ -54,7 +56,6 @@ export default class User {
     photo: string;
 
   @Column({
-    // type: 'boolean',
     default: false,
   })
     isEmailVerified: boolean;
@@ -62,8 +63,11 @@ export default class User {
   @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile;
 
-  static createPassword(password: string) {
-    const { secret } = defaultConfig;
+  @OneToOne(() => PasswordReset, (passwordReset) => passwordReset.user)
+    passwordReset: PasswordReset;
+
+  static createPasswordHash(password: string) {
+    const secret = defaultConfig.secrets.password;
     const hash = createHmac('sha256', secret).update(password).digest('hex');
 
     return hash;
@@ -105,7 +109,7 @@ export default class User {
     };
   }
 
-  public activationLink(): string {
+  public createLink(): string {
     const payload: IUserTokenPayload = {
       id: this.id,
       email: this.email,

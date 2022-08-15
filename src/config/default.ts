@@ -2,7 +2,10 @@ import dotenv from 'dotenv';
 
 interface IConfig {
   port: string;
-  secret: string;
+  secrets: {
+    password: string;
+    verifyCode: string;
+  },
   database: {
     name: string;
     username: string;
@@ -32,7 +35,10 @@ dotenv.config();
 
 const defaultConfig: IConfig = {
   port: process.env.PORT,
-  secret: process.env.SECRET,
+  secrets: {
+    password: process.env.SECRETS_PASSWORD,
+    verifyCode: process.env.SECRETS_VERIFY_CODE,
+  },
   database: {
     name: process.env.DATABASE,
     username: process.env.DATABASE_USERNAME,

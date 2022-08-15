@@ -5,7 +5,7 @@ import dataSource from '../../../database/databaseConfig';
 import defaultConfig from '../../../config/default';
 
 import { IAppContext, IUserTokenPayload } from '../../../types/interface';
-import { Forbidden, ConflictError, NotFoundError } from '../../errors';
+import { ForbiddenError, ConflictError, NotFoundError } from '../../errors';
 
 export default async function jwtActivation(ctx: IAppContext, next: () => Promise<any>) {
   try {
@@ -29,9 +29,9 @@ export default async function jwtActivation(ctx: IAppContext, next: () => Promis
     if (user.isEmailVerified) throw new ConflictError(`E-mail: ${user.email} is already verified`);
 
     ctx.user = user;
-  } catch (error: any | Forbidden) {
+  } catch (error: any | ForbiddenError) {
     if (error instanceof TokenExpiredError) {
-      throw new Forbidden('Forbidden');
+      throw new ForbiddenError('Forbidden');
     }
     throw error;
   }

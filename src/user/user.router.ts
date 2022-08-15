@@ -3,6 +3,7 @@ import Router from 'koa-router';
 import UserController from './user.controller';
 import jwtStrategy from '../utils/middleware/auth/jwtStrategy';
 import jwtActivation from '../utils/middleware/auth/jwtActivation';
+import codeVerify from '../utils/middleware/codeVerify';
 
 const userRouter = new Router();
 
@@ -17,7 +18,7 @@ userRouter.put('/users/photo', jwtStrategy, UserController.updatePhoto);
 
 userRouter.get('/users/confirm-email/:activationLink', jwtActivation, UserController.confirmEmail);
 
-userRouter.post('/users/reset-password', UserController.resetPassword);
-userRouter.post('/users/reset-password/:resetLink', UserController.resetPassword);
+userRouter.post('/users/password/reset', UserController.sendResetPasswordMail);
+userRouter.put('/users/password/reset', codeVerify, UserController.resetPassword);
 
 export default userRouter;

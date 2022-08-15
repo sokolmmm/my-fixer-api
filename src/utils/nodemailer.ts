@@ -47,7 +47,7 @@ class MailService {
     });
   }
 
-  async sendResetPasswordMail(to:string, link: string) {
+  async sendResetPasswordMail(to:string, code: string) {
     await this.transporter.sendMail({
       from: defaultConfig.nodemailer.auth.user,
       to,
@@ -60,7 +60,7 @@ class MailService {
                  Hey there, <br>
                  You are receiving this email because we received a password reset request for your account. <br>
                 <p>
-                <a href="${link}">Reset your password</a>
+                <p>${code}</p>
                 <p>
                   If you did not make this request, please ignore this email.
                 </p>
