@@ -26,8 +26,7 @@ class MailService {
       to,
       subject: 'Please Activate E-mail Address',
       text: '',
-      html:
-        `
+      html: `
             <div>
                 <p>
                   Hello from MyFixer Company!<br>
@@ -47,21 +46,21 @@ class MailService {
     });
   }
 
-  async sendResetPasswordMail(to:string, code: string) {
+  async sendResetPasswordMail(to: string, code: string) {
     await this.transporter.sendMail({
       from: defaultConfig.nodemailer.auth.user,
       to,
       subject: 'Reset password',
       text: '',
-      html:
-        `
+      html: `
             <div>
                 <p>
                  Hey there, <br>
                  You are receiving this email because we received a password reset request for your account. <br>
                 <p>
-                <p>${code}</p>
+                  This is your password reset code:
                 <p>
+                <h3>${code}</h3>
                   If you did not make this request, please ignore this email.
                 </p>
                 <p>

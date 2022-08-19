@@ -1,12 +1,10 @@
-import { Context } from 'koa';
-
 import UserService from './user.service';
 import userValidator from './user.validator';
 
-import { ICreateUserPayload, ISearchUsersParams, IAppContext } from '../types/interface';
+import { IAppContext, ICreateUserPayload, ISearchUsersParams } from '../types/interface';
 
 export default class UserController {
-  static async createUser(ctx: Context) {
+  static async createUser(ctx: IAppContext) {
     const payload: ICreateUserPayload = ctx.request.body;
 
     userValidator.validateCreateUserPayload(payload);
@@ -73,7 +71,7 @@ export default class UserController {
     ctx.redirect('http://localhost:3000/sign-up/complete-account-successful');
   }
 
-  static async sendResetPasswordMail(ctx: Context) {
+  static async sendResetPasswordMail(ctx: IAppContext) {
     const { email } = ctx.request.body;
 
     const user = await UserService.sendResetPasswordMail(email);
@@ -83,6 +81,8 @@ export default class UserController {
 
   static async resetPassword(ctx: IAppContext) {
     const { email, password } = ctx.request.body;
+
+    userValidator.validatePassword(password);
 
     await UserService.resetPassword(email, password);
 

@@ -1,10 +1,11 @@
 import Router from 'koa-router';
 
 import ProfileController from './profile.controller';
+import jwtStrategy from '../utils/middleware/auth/jwtStrategy';
+import activationChecker from '../utils/middleware/activationChecker';
 
 const profileRouter = new Router();
 
-profileRouter.get('/users/:userId/profiles', ProfileController.retrieveProfileById);
-profileRouter.patch('/users/:userId/profiles', ProfileController.patchProfileById);
+profileRouter.patch('/users/profile', jwtStrategy, activationChecker, ProfileController.patchProfileById);
 
 export default profileRouter;

@@ -1,16 +1,16 @@
-import { Context } from 'koa';
-
 import StacksService from './stack.service';
 import stackValidator from './stack.validator';
 
+import { IAppContext } from '../types/interface';
+
 export default class StackController {
-  static async stacksList(ctx: Context) {
+  static async stacksList(ctx: IAppContext) {
     const stacks = await StacksService.stacksList();
 
     ctx.body = stacks;
   }
 
-  static async retrieveStackById(ctx: Context) {
+  static async retrieveStackById(ctx: IAppContext) {
     const { stackId } = ctx.params;
 
     const stack = await StacksService.retrieveStackById(stackId);
@@ -18,7 +18,7 @@ export default class StackController {
     ctx.body = stack;
   }
 
-  static async createStack(ctx: Context) {
+  static async createStack(ctx: IAppContext) {
     const payload = ctx.request.body;
 
     stackValidator.validateCreateStackPayload(payload);

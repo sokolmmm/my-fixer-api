@@ -67,7 +67,7 @@ export interface IBase64Photo {
 }
 
 export interface IAppContext extends Context {
-  user: User;
+  user?: User;
 }
 
 export interface IUserTokenPayload extends JwtPayload {

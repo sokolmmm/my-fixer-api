@@ -1,27 +1,18 @@
-import { Context } from 'koa';
-
 import ProfileService from './profile.service';
-import { IPatchProfilePayload } from '../types/interface';
 import profileValidator from './profile.validator';
 
+import { IAppContext, IPatchProfilePayload } from '../types/interface';
+
 export default class ProfileController {
-  static async patchProfileById(ctx: Context) {
-    const { userId } = ctx.params;
+  static async patchProfileById(ctx: IAppContext) {
+    const { id } = ctx.user;
 
     const payload: IPatchProfilePayload = ctx.request.body;
 
     profileValidator.validatePatchProfilePayload(payload);
 
-    const profile = await ProfileService.patchProfile(userId, payload);
+    const user = await ProfileService.patchProfile(id, payload);
 
-    ctx.body = profile;
-  }
-
-  static async retrieveProfileById(ctx: Context) {
-    const { userId } = ctx.params;
-
-    const profile = await ProfileService.profileById(userId);
-
-    ctx.body = profile;
+    ctx.body = user.info();
   }
 }

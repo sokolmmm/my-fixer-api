@@ -50,9 +50,6 @@ class UserValidator {
   });
 
   private base64PhotoSchema = Joi.object({
-    // photo: Joi.string().base64().max(2796202).messages({
-    //   'string.max': 'The picture must be smaller than 2 MB',
-    // }),
     photo: Joi.string(),
     extension: Joi.string().valid(
       EnumPhotoExtensions.JPEG,
@@ -61,6 +58,10 @@ class UserValidator {
       EnumPhotoExtensions.SVG,
       EnumPhotoExtensions.GIF,
     ),
+  });
+
+  private resetPasswordSchema = Joi.object({
+    password: Joi.string().min(3).max(15).required(),
   });
 
   public validateCreateUserPayload(payload: ICreateUserPayload) {
@@ -93,6 +94,11 @@ class UserValidator {
 
   public validateBase64Photo(payload: IBase64Photo) {
     const result = this.base64PhotoSchema.validate(payload);
+    if (result.error) throw new ValidationError(result.error.message);
+  }
+
+  public validatePassword(password: string) {
+    const result = this.resetPasswordSchema.validate(password);
     if (result.error) throw new ValidationError(result.error.message);
   }
 }

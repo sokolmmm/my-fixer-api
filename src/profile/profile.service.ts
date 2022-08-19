@@ -6,35 +6,27 @@ import { IPatchProfilePayload } from '../types/interface';
 import { NotFoundError } from '../utils/errors';
 
 export default class ProfileService {
-  static async getProfileFromDB(userId: string) {
-    const profile = await dataSource
+  private static async getUser(id: number) {
+    const user = await dataSource
       .getRepository(User)
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('profile.stack', 'stack')
-      .select(['user.id', 'profile.rating', 'stack'])
-      .where('user.id = :id', { id: userId })
+      .select(['user', 'profile.rating', 'stack.title'])
+      .where('user.id = :id', { id })
       .getOne();
 
-    return profile;
+    return user;
   }
 
-  static async profileById(userId: string) {
-    const profile = await this.getProfileFromDB(userId);
-
-    if (!profile) throw new NotFoundError(`User with id: ${userId} doesn't exist`);
-
-    return profile;
-  }
-
-  static async patchProfile(userId: string, payload: IPatchProfilePayload) {
+  static async patchProfile(userId: number, payload: IPatchProfilePayload) {
     const stack = await dataSource
       .getRepository(Stack)
       .createQueryBuilder('stack')
       .where('id = :id', { id: payload.stack })
       .getOne();
 
-    if (!stack && payload.stack) throw new NotFoundError(`Stack with id: ${payload.stack} doesn't exist`);
+    if (!stack && payload.stack) { throw new NotFoundError(`Stack with id: ${payload.stack} doesn't exist`); }
 
     const profile = await dataSource
       .createQueryBuilder()
@@ -46,10 +38,9 @@ export default class ProfileService {
       .where('userId = :userId', { userId })
       .execute();
 
-    if (!profile.affected) throw new NotFoundError(`Profile with id: ${userId} doesn't exist`);
+    if (!profile.affected) throw new NotFoundError(`User with id: ${userId} doesn't exist`);
+    const user = await this.getUser(userId);
 
-    const profileInDB = await this.getProfileFromDB(userId);
-
-    return profileInDB;
+    return user;
   }
 }
