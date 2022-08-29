@@ -1,12 +1,26 @@
 import Router from 'koa-router';
+
 import UserController from './user.controller';
+import jwtStrategy from '../utils/middleware/auth/jwtStrategy';
+import jwtActivation from '../utils/middleware/auth/jwtActivation';
+import codeVerify from '../utils/middleware/codeVerify';
+import activationChecker from '../utils/middleware/activationChecker';
 
 const userRouter = new Router();
 
-userRouter.get('/users', UserController.usersList);
-
 userRouter.post('/users', UserController.createUser);
-userRouter.get('/users/:userId', UserController.retrieveUserById);
-userRouter.patch('/users/:userId', UserController.patchUserById);
-userRouter.delete('/users/:userId', UserController.deleteUserById);
+userRouter.get('/users', jwtStrategy, activationChecker, UserController.usersList);
+userRouter.patch('/users', jwtStrategy, activationChecker, UserController.patchUserById);
+
+userRouter.get('/users/:userId', jwtStrategy, activationChecker, UserController.retrieveUserById);
+userRouter.delete('/users/:userId', jwtStrategy, activationChecker, UserController.deleteUserById);
+
+userRouter.put('/users/photo', jwtStrategy, activationChecker, UserController.updatePhoto);
+
+userRouter.get('/users/confirm-email/:activationLink', jwtActivation, UserController.confirmEmail);
+
+userRouter.post('/users/password/reset', UserController.sendResetPasswordMail);
+userRouter.put('/users/password/reset', codeVerify, UserController.resetPassword);
+userRouter.post('/users/password/reset/verify-code', codeVerify, UserController.verifyCode);
+
 export default userRouter;

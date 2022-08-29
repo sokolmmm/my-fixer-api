@@ -1,42 +1,34 @@
-import { ICreateProfilePayload } from '../types/interface';
-// import { NotFoundError } from '../utils/errors';
 import Profile from './entities/profile.repository';
-import dataSource from '../database/databaseConfig';
 import User from '../user/entities/user.repository';
 import Stack from '../stack/entities/stack.repository';
+import dataSource from '../database/databaseConfig';
+import { IPatchProfilePayload } from '../types/interface';
+import { NotFoundError } from '../utils/errors';
 
 export default class ProfileService {
-  static async createProfile(userId: string, payload: ICreateProfilePayload) {
-    const user = await dataSource.getRepository(User).findOne({
-      where: {
-        id: +userId,
-      },
-    });
+  private static async getUser(id: number) {
+    const user = await dataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('profile.stack', 'stack')
+      .select(['user', 'profile.rating', 'stack.title'])
+      .where('user.id = :id', { id })
+      .getOne();
 
-    const stack = await dataSource.getRepository(Stack).findOne({
-      where: {
-        id: +payload.stack,
-      },
-    });
-
-    await dataSource.createEntityManager().save(Profile, {
-      rating: payload.rating,
-      user,
-      stack,
-    });
-
-    const profile = this.profileById(userId);
-    return profile;
+    return user;
   }
 
-  static async patchProfile(userId: string, payload: ICreateProfilePayload) {
-    const stack = await dataSource.getRepository(Stack).findOne({
-      where: {
-        id: +payload.stack,
-      },
-    });
+  static async patchProfile(userId: number, payload: IPatchProfilePayload) {
+    const stack = await dataSource
+      .getRepository(Stack)
+      .createQueryBuilder('stack')
+      .where('id = :id', { id: payload.stack })
+      .getOne();
 
-    await dataSource
+    if (!stack && payload.stack) { throw new NotFoundError(`Stack with id: ${payload.stack} doesn't exist`); }
+
+    const profile = await dataSource
       .createQueryBuilder()
       .update(Profile)
       .set({
@@ -46,20 +38,9 @@ export default class ProfileService {
       .where('userId = :userId', { userId })
       .execute();
 
-    const profile = this.profileById(userId);
-    return profile;
-  }
+    if (!profile.affected) throw new NotFoundError(`User with id: ${userId} doesn't exist`);
+    const user = await this.getUser(userId);
 
-  static async profileById(userId: string) {
-    const profile = await dataSource
-      .getRepository(User)
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('profile.stack', 'stack')
-      .select(['user.id', 'profile.rating', 'stack.title'])
-      .where('user.id = :id', { id: userId })
-      .getOne();
-
-    return profile;
+    return user;
   }
 }

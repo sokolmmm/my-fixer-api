@@ -15,8 +15,26 @@ export class ValidationError extends BaseError {
   }
 }
 
+export class UnauthorizedError extends BaseError {
+  constructor(message: string) {
+    super(message, 'UnauthorizedError', 401);
+  }
+}
+
+export class ForbiddenError extends BaseError {
+  constructor(message: string) {
+    super(message, 'Forbidden', 403);
+  }
+}
+
 export class NotFoundError extends BaseError {
   constructor(message: string) {
     super(message, 'NotFoundError', 404);
+  }
+}
+
+export class ConflictError extends BaseError {
+  constructor(message: string) {
+    super(message, 'ConflictError', 409);
   }
 }

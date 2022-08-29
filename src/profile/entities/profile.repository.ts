@@ -15,10 +15,10 @@ export default class Profile {
   })
     rating: number;
 
-  @OneToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
   @JoinColumn()
     user: User;
 
-  @ManyToOne(() => Stack, (stack) => stack.profile)
+  @ManyToOne(() => Stack, (stack) => stack.profile, { nullable: true })
     stack: Stack;
 }
