@@ -20,6 +20,7 @@ userRouter.put('/users/photo', jwtStrategy, activationChecker, UserController.up
 userRouter.get('/users/confirm-email/:activationLink', jwtActivation, UserController.confirmEmail);
 
 userRouter.post('/users/password/reset', UserController.sendResetPasswordMail);
-userRouter.put('/users/password/reset', codeVerify, activationChecker, UserController.resetPassword);
+userRouter.put('/users/password/reset', codeVerify, UserController.resetPassword);
+userRouter.post('/users/password/reset/verify-code', codeVerify, UserController.verifyCode);
 
 export default userRouter;

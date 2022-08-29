@@ -83,6 +83,10 @@ export default class UserService {
       .execute();
 
     if (!user.affected) throw new NotFoundError(`User with id: ${id} doesn't exist`);
+
+    const userInDB = await this.getUserFromDB(id);
+
+    return userInDB;
   }
 
   static async deleteById(id: number) {
@@ -106,6 +110,10 @@ export default class UserService {
       .update({ photo: photoUrl })
       .where('id = :id', { id })
       .execute();
+
+    const userInDB = await this.getUserFromDB(id);
+
+    return userInDB;
   }
 
   static async confirmEmail(user: User) {
@@ -131,10 +139,25 @@ export default class UserService {
     const verifyCode = PasswordReset.createCode();
     const codeHash = PasswordReset.createCodeHash(verifyCode);
 
-    await dataSource.createEntityManager().save(PasswordReset, {
-      codeHash,
-      user,
-    });
+    const passwordReset = await dataSource
+      .getRepository(PasswordReset)
+      .createQueryBuilder('password_reset')
+      .where('password_reset.email = :email', { email })
+      .getOne();
+
+    if (passwordReset) {
+      await dataSource
+        .getRepository(PasswordReset)
+        .createQueryBuilder('password_reset')
+        .update({ codeHash })
+        .where('password_reset.email = :email', { email })
+        .execute();
+    } else {
+      await dataSource.createEntityManager().save(PasswordReset, {
+        codeHash,
+        user,
+      });
+    }
 
     await mailService.sendResetPasswordMail(user.email, verifyCode);
 

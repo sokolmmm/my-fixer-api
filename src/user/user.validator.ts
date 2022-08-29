@@ -15,12 +15,7 @@ class UserValidator {
   private createUserSchema = Joi.object({
     firstName: Joi.string().min(3).max(15).required(),
     lastName: Joi.string().min(3).max(15).required(),
-    email: Joi.string()
-      .email({
-        minDomainSegments: 2,
-        tlds: { allow: ['com', 'net'] },
-      })
-      .required(),
+    email: Joi.string().email().required(),
     password: Joi.string().min(3).max(15).required(),
     country: Joi.string().min(3).max(35),
     phoneNumber: Joi.string().min(3).max(15),
@@ -30,10 +25,7 @@ class UserValidator {
   private patchUserSchema = Joi.object({
     firstName: Joi.string().min(3).max(10),
     lastName: Joi.string().min(3).max(10),
-    email: Joi.string().email({
-      minDomainSegments: 2,
-      tlds: { allow: ['com', 'net'] },
-    }),
+    email: Joi.string().email().required(),
     country: Joi.string().min(3).max(25),
     phoneNumber: Joi.string().min(3).max(10),
     title: Joi.string().min(2).max(10),
@@ -98,7 +90,7 @@ class UserValidator {
   }
 
   public validatePassword(password: string) {
-    const result = this.resetPasswordSchema.validate(password);
+    const result = this.resetPasswordSchema.validate({ password });
     if (result.error) throw new ValidationError(result.error.message);
   }
 }

@@ -25,13 +25,13 @@ export default class UserController {
   }
 
   static async patchUserById(ctx: IAppContext) {
-    const { user } = ctx;
+    const { id } = ctx.user;
 
     const payload: ICreateUserPayload = ctx.request.body;
 
     userValidator.validatePatchUserPayload(payload);
 
-    await UserService.patchUser(user.id, payload);
+    const user = await UserService.patchUser(id, payload);
 
     ctx.body = user.info();
   }
@@ -53,22 +53,22 @@ export default class UserController {
   }
 
   static async updatePhoto(ctx: IAppContext) {
-    const { user } = ctx;
+    const { id, email } = ctx.user;
 
     const { photo } = ctx.request.body;
 
     userValidator.validateUpdateUserPhoto({ photo });
 
-    await UserService.updatePhoto(user.id, user.email, photo);
+    const user = await UserService.updatePhoto(id, email, photo);
 
-    ctx.body = user.info();
+    ctx.body = user;
   }
 
   static async confirmEmail(ctx: IAppContext) {
     const { user } = ctx;
 
     await UserService.confirmEmail(user);
-    ctx.redirect('http://localhost:3000/sign-up/complete-account-successful');
+    ctx.redirect('http://localhost:3000/sign-up/activation-successful');
   }
 
   static async sendResetPasswordMail(ctx: IAppContext) {
@@ -77,6 +77,10 @@ export default class UserController {
     const user = await UserService.sendResetPasswordMail(email);
 
     ctx.body = user;
+  }
+
+  static async verifyCode(ctx: IAppContext) {
+    ctx.body = 'The check was successful';
   }
 
   static async resetPassword(ctx: IAppContext) {
